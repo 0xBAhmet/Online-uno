@@ -1,9 +1,9 @@
-class Card {
-    constructor(color, value, type) {
-        this.color = color; // 'red', 'blue', 'green', 'yellow', 'wild'
-        this.value = value; // 0-9, 'skip', 'reverse', 'draw_two', 'wild', 'wild_draw_four'
-        this.type = type;   // 'number', 'action', 'wild'
-    }
+constructor(color, value, type) {
+    this.id = Math.random().toString(36).substr(2, 9) + Date.now().toString(36); // Unique ID
+    this.color = color; // 'red', 'blue', 'green', 'yellow', 'wild'
+    this.value = value; // 0-9, 'skip', 'reverse', 'draw_two', 'wild', 'wild_draw_four'
+    this.type = type;   // 'number', 'action', 'wild'
+}
 }
 
 class Deck {

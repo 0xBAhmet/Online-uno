@@ -99,8 +99,29 @@ const GameBoard = ({ socket, gameState, myId }) => {
                     )}
                 </div>
 
-                <div className="discard-pile">
+                <div className="discard-pile" style={{
+                    boxShadow: gameState.currentColor && gameState.currentColor !== 'wild'
+                        ? `0 0 20px 5px var(--card-${gameState.currentColor})`
+                        : 'none',
+                    transition: 'box-shadow 0.5s ease'
+                }}>
                     <Card card={gameState.topCard} />
+                    {/* Explicit Color Indicator for Wilds */}
+                    {gameState.topCard?.type === 'wild' && gameState.currentColor && gameState.currentColor !== 'wild' && (
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '-40px',
+                            background: `var(--card-${gameState.currentColor})`,
+                            padding: '5px 10px',
+                            borderRadius: '20px',
+                            color: gameState.currentColor === 'yellow' ? 'black' : 'white',
+                            fontWeight: 'bold',
+                            whiteSpace: 'nowrap',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.5)'
+                        }}>
+                            Color: {gameState.currentColor.toUpperCase()}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -110,7 +131,7 @@ const GameBoard = ({ socket, gameState, myId }) => {
 
                 <div className="player-hand">
                     {myPlayer && myPlayer.hand && myPlayer.hand.map((card, index) => (
-                        <div key={index} className="hand-card-wrapper" style={{ zIndex: index }}>
+                        <div key={card.id || index} className="hand-card-wrapper" style={{ zIndex: index }}>
                             <Card
                                 card={card}
                                 onClick={() => handleCardClick(index, card)}
