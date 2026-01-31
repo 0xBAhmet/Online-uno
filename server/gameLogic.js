@@ -90,7 +90,17 @@ class Game {
         }
 
         if (this.status !== 'waiting') return { success: false, message: 'Game started' };
-        if (this.players.length >= 4) return { success: false, message: 'Room full' }; // Max 4 players
+
+        // If room is full, check for disconnected players to replace
+        if (this.players.length >= 4) {
+            const disconnectedPlayer = this.players.find(p => !p.connected);
+            if (disconnectedPlayer) {
+                console.log('Auto-removing disconnected player:', disconnectedPlayer.name);
+                this.removePlayer(disconnectedPlayer.id);
+            } else {
+                return { success: false, message: 'Room full' };
+            }
+        }
 
         // Add new player
         // id = logicId (Logic ID), socketId = transport ID
