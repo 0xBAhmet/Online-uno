@@ -171,13 +171,18 @@ function App() {
             if (confirm('Tüm bilgilerini silip çıkmak istiyor musun?')) {
               // Notify server to remove me, wait for ACK
               socket.emit('leaveGame', { playerId: myPlayerId }, () => {
+                // Clear ALL localStorage data
                 localStorage.removeItem('uno_player_id');
-                window.location.reload();
+                localStorage.removeItem('uno_player_name');
+
+                // Reload after a brief delay to ensure cleanup
+                setTimeout(() => window.location.reload(), 100);
               });
 
               // Fallback if server doesn't respond fast
               setTimeout(() => {
                 localStorage.removeItem('uno_player_id');
+                localStorage.removeItem('uno_player_name');
                 window.location.reload();
               }, 500);
             }
