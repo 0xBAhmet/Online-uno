@@ -19,16 +19,23 @@ function App() {
     localStorage.setItem('uno_player_id', newId);
     return newId;
   });
+  const [serverError, setServerError] = useState('');
 
   const t = translations[language];
 
   useEffect(() => {
     socket.on('connect', () => {
       setIsConnected(true);
+      setServerError('');
     });
 
-    socket.on('gameState', (data) => {
-      setGameState(data);
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+    });
+
+    socket.on('gameState', (state) => {
+      console.log('Game State Received:', state);
+      setGameState(state);
     });
 
     socket.on('gameOver', ({ winner }) => {
@@ -36,24 +43,62 @@ function App() {
     });
 
     socket.on('error', (msg) => {
-      alert(msg);
+      setServerError(msg);
+      // Clear error after 3 seconds
+      setTimeout(() => setServerError(''), 5000);
     });
 
     return () => {
       socket.off('connect');
+      socket.off('disconnect');
       socket.off('gameState');
       socket.off('gameOver');
+      socket.off('error');
     };
   }, []);
 
-  if (!gameState) return <div className="lobby-container"><h1 className='lobby-title'>Loading...</h1></div>;
-
   // Derived state for view switching
-  const isInLobby = gameState.status === 'waiting';
-  const isPlaying = gameState.status === 'playing' || gameState.status === 'finished';
+  const isInLobby = gameState && (gameState.status === 'waiting' || gameState.status === 'finished');
+  const isPlaying = gameState && gameState.status === 'playing';
+
+  if (!gameState) {
+    return (
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: '#1a1a2e',
+        color: 'white',
+        flexDirection: 'column'
+      }}>
+        <h1>{t.loading}</h1>
+        {!isConnected && <p style={{ color: 'gray' }}>Connecting to server...</p>}
+      </div>
+    );
+  }
 
   return (
     <>
+      {/* Error Toast */}
+      {serverError && (
+        <div style={{
+          position: 'absolute',
+          top: '50px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'red',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '5px',
+          zIndex: 9999,
+          fontWeight: 'bold',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+        }}>
+          {serverError}
+        </div>
+      )}
+
       {/* Language Toggle */}
       <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 3000 }}>
         <button
