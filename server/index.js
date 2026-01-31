@@ -36,12 +36,10 @@ io.on('connection', (socket) => {
         const result = game.addPlayer(socket.id, username, playerId);
 
         if (result.success) {
+            console.log(result.isReconnect ? 'Player reconnected:' : 'New player joined:', username, playerId);
             socket.join(game.id); // Valid for both new and reconnect
 
-            // Broadcast generic state
-            io.to(game.id).emit('gameState', game.getGameStateForPlayer(null));
-
-            // Send specific state to each player
+            // Send specific state to each player (including the one who just joined/reconnected)
             game.players.forEach(p => {
                 if (p.connected && p.socketId) {
                     io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
@@ -118,11 +116,18 @@ io.on('connection', (socket) => {
     });
 
     socket.on('leaveGame', (data, callback) => {
-        const player = game.players.find(p => p.socketId === socket.id);
+        // Try to find player by socket ID first, then by player ID from data
+        let player = game.players.find(p => p.socketId === socket.id);
+        if (!player && data && data.playerId) {
+            player = game.players.find(p => p.id === data.playerId);
+        }
+
         if (player) {
-            console.log('Player left explicitly:', player.name);
+            console.log('Player left explicitly:', player.name, player.id);
             game.removePlayer(player.id);
             io.emit('gameState', game.getGameStateForPlayer(null)); // Broadcast to all
+        } else {
+            console.log('Could not find player to remove:', socket.id, data);
         }
         // Acknowledge receipt
         if (typeof callback === 'function') callback();
