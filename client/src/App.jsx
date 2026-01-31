@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import Lobby from './components/Lobby';
 import GameBoard from './components/GameBoard';
 
-const socket = io('http://localhost:3000'); // Ensure this matches server port
+const socket = io('https://jimmyhummluk-uno-online.hf.space'); // Ensure this matches server port
 
 function App() {
   const [gameState, setGameState] = useState(null);
