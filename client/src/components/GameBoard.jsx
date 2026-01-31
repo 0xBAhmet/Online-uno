@@ -58,7 +58,32 @@ const GameBoard = ({ socket, gameState, myId }) => {
     const isMyTurn = gameState.currentPlayer === myId;
 
     return (
-        <div className="game-board">
+        <div className="game-board" style={{ position: 'relative' }}>
+            {/* Top Right: End Game Button */}
+            <button
+                onClick={() => {
+                    if (confirm('Are you sure you want to end the game for everyone?')) {
+                        socket.emit('returnToLobby');
+                    }
+                }}
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    padding: '8px 16px',
+                    background: 'rgba(255, 82, 82, 0.8)', // Red
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    zIndex: 1000,
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem'
+                }}
+            >
+                End Game
+            </button>
+
             {/* Top: Opponents */}
             <div className="opponents-zone">
                 {opponents.map(p => (
