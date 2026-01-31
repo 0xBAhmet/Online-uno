@@ -117,6 +117,15 @@ io.on('connection', (socket) => {
         // If kicked, we might want to notify specifically, but gameState update implies removal
     });
 
+    socket.on('leaveGame', () => {
+        const player = game.players.find(p => p.socketId === socket.id);
+        if (player) {
+            console.log('Player left explicitly:', player.name);
+            game.removePlayer(player.id);
+            io.emit('gameState', game.getGameStateForPlayer(null)); // Broadcast to all
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         game.handleDisconnect(socket.id);

@@ -8,7 +8,7 @@ const Lobby = ({ socket, isInLobby, players = [], t, myPlayerId }) => {
         e.preventDefault();
         if (!username.trim()) return;
 
-        socket.emit('joinGame', { username });
+        socket.emit('joinGame', { username, playerId: myPlayerId });
     };
 
     const handleStart = () => {
