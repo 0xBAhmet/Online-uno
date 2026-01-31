@@ -160,7 +160,7 @@ function App() {
           onClick={() => {
             if (confirm('Tüm bilgilerini silip çıkmak istiyor musun?')) {
               // Notify server to remove me, wait for ACK
-              socket.emit('leaveGame', {}, () => {
+              socket.emit('leaveGame', { playerId: myPlayerId }, () => {
                 localStorage.removeItem('uno_player_id');
                 window.location.reload();
               });
