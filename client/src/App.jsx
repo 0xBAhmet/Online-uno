@@ -33,14 +33,7 @@ function App() {
       setIsConnected(true);
       setServerError('');
 
-      // Auto-rejoin if we have a player ID (reconnection scenario)
-      if (myPlayerId) {
-        console.log('Auto-rejoining with ID:', myPlayerId);
-        socket.emit('joinGame', {
-          username: localStorage.getItem('uno_player_name') || 'Player',
-          playerId: myPlayerId
-        });
-      }
+      // Don't auto-rejoin here - wait for gameState to decide
     });
 
     socket.on('disconnect', () => {
@@ -50,6 +43,19 @@ function App() {
     socket.on('gameState', (state) => {
       console.log('Game State Received:', state);
       console.log('Status:', state?.status, 'Players:', state?.players?.length, 'My ID:', myPlayerId);
+
+      // Auto-rejoin ONLY if we're already in the players list but disconnected
+      if (myPlayerId && state?.players) {
+        const existingPlayer = state.players.find(p => p.id === myPlayerId);
+        if (existingPlayer && !existingPlayer.connected) {
+          console.log('Reconnecting to existing session...');
+          socket.emit('joinGame', {
+            username: localStorage.getItem('uno_player_name') || existingPlayer.name || 'Player',
+            playerId: myPlayerId
+          });
+        }
+      }
+
       setGameState(state);
     });
 
