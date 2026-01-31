@@ -40,6 +40,7 @@ function App() {
 
     socket.on('gameState', (state) => {
       console.log('Game State Received:', state);
+      console.log('Status:', state?.status, 'Players:', state?.players?.length, 'My ID:', myPlayerId);
       setGameState(state);
     });
 

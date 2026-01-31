@@ -8,6 +8,8 @@ const Lobby = ({ socket, isInLobby, players = [], t, myPlayerId }) => {
         e.preventDefault();
         if (!username.trim()) return;
 
+        // Store username for reconnection
+        localStorage.setItem('uno_player_name', username);
         socket.emit('joinGame', { username, playerId: myPlayerId });
     };
 
