@@ -84,6 +84,28 @@ const GameBoard = ({ socket, gameState, myId, t }) => {
                 {t.endGame}
             </button>
 
+            {/* Waiting for Disconnected Player Overlay */}
+            {gameState.isWaitingForDisconnected && (
+                <div className="color-picker-overlay">
+                    <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+                        <h2 style={{ marginBottom: '1rem' }}>⏳ {t.waiting || 'Oyuncu Bekleniyor'}</h2>
+                        <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                            <strong>{gameState.waitingForPlayer}</strong> {t.disconnected || 'bağlantısı koptu.'}
+                        </p>
+                        <p style={{ color: '#aaa' }}>
+                            {t.waitingReconnect || 'Geri dönmesi bekleniyor...'}
+                        </p>
+                        <div style={{
+                            marginTop: '1rem',
+                            animation: 'pulse 2s infinite',
+                            fontSize: '2rem'
+                        }}>
+                            ⌛
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Top: Opponents */}
             <div className="opponents-zone">
                 {opponents.map(p => (

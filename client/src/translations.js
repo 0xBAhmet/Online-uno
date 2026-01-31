@@ -19,6 +19,9 @@ export const translations = {
         chooseColor: 'Renk Seç',
         kick: 'At',
         vote: 'Oy',
+        waiting: 'Oyuncu Bekleniyor',
+        disconnected: 'bağlantısı koptu.',
+        waitingReconnect: 'Geri dönmesi bekleniyor...',
         unoServerRunning: 'Uno Sunucusu Çalışıyor! 🚀'
     },
     en: {
@@ -41,6 +44,9 @@ export const translations = {
         chooseColor: 'Choose Color',
         kick: 'Kick',
         vote: 'Vote',
+        waiting: 'Waiting for Player',
+        disconnected: 'disconnected.',
+        waitingReconnect: 'Waiting for reconnection...',
         unoServerRunning: 'Uno Server is Running! 🚀'
     }
 };

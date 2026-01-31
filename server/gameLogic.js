@@ -67,6 +67,8 @@ class Game {
         this.status = 'waiting'; // 'waiting', 'playing', 'finished'
         this.currentColor = null; // Used for wild cards
         this.accumulatedDraw = 0; // NEW: Track stacked draws
+        this.disconnectTimeouts = new Map(); // playerId -> timeout
+        this.DISCONNECT_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     }
 
     /**
@@ -82,6 +84,12 @@ class Game {
         const existingPlayer = this.players.find(p => p.id === logicId);
 
         if (existingPlayer) {
+            // Clear disconnect timeout on reconnect
+            if (this.disconnectTimeouts.has(logicId)) {
+                clearTimeout(this.disconnectTimeouts.get(logicId));
+                this.disconnectTimeouts.delete(logicId);
+            }
+
             // Reconnect
             existingPlayer.socketId = socketId;
             existingPlayer.connected = true;
@@ -119,9 +127,15 @@ class Game {
         const player = this.players.find(p => p.socketId === socketId);
         if (player) {
             player.connected = false;
+
+            // Set timeout to auto-remove if they don't reconnect within 5 minutes
+            const timeout = setTimeout(() => {
+                console.log('Auto-removing player due to timeout:', player.name);
+                this.removePlayer(player.id);
+            }, this.DISCONNECT_TIMEOUT);
+
+            this.disconnectTimeouts.set(player.id, timeout);
         }
-        // Do NOT remove player. Wait for reconnect or kick.
-        // If all players disconnect, maybe reset? For now, keep state.
     }
 
     // Returns true if kicked
@@ -233,6 +247,12 @@ class Game {
         const playerIndex = this.players.findIndex(p => p.id === playerId);
         if (playerIndex !== this.currentPlayerIndex) return { success: false, message: 'Not your turn' };
 
+        // Check if current player is disconnected - game should wait
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        if (!currentPlayer.connected) {
+            return { success: false, message: 'Waiting for disconnected player to reconnect' };
+        }
+
         const player = this.players[playerIndex];
         const card = player.hand[cardIndex];
         const topCard = this.discardPile[this.discardPile.length - 1];
@@ -336,6 +356,11 @@ class Game {
 
         const player = this.players[playerIndex];
 
+        // Check if current player is disconnected - game should wait
+        if (!player.connected) {
+            return { success: false, message: 'Waiting for disconnected player to reconnect' };
+        }
+
         if (this.accumulatedDraw > 0) {
             // Player accepts the stack penalty
             this.drawCards(player, this.accumulatedDraw);
@@ -365,6 +390,9 @@ class Game {
     }
 
     getGameStateForPlayer(playerId) {
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        const isWaitingForDisconnected = currentPlayer && !currentPlayer.connected && this.status === 'playing';
+
         return {
             id: this.id,
             players: this.players.map(p => ({
@@ -381,7 +409,9 @@ class Game {
             currentPlayer: this.players[this.currentPlayerIndex]?.id,
             status: this.status,
             direction: this.direction,
-            accumulatedDraw: this.accumulatedDraw
+            accumulatedDraw: this.accumulatedDraw,
+            isWaitingForDisconnected: isWaitingForDisconnected,
+            waitingForPlayer: isWaitingForDisconnected ? currentPlayer.name : null
         };
     }
 }

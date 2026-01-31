@@ -35,16 +35,13 @@ const broadcastState = () => {
 };
 
 io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
-
-    // Send initial state so client stops loading
+    // Initial state emission for the individual socket (no global log here to avoid spam)
     socket.emit('gameState', game.getGameStateForPlayer(null));
 
     socket.on('joinGame', ({ username, playerId }) => {
         const result = game.addPlayer(socket.id, username, playerId);
 
         if (result.success) {
-            console.log(result.isReconnect ? 'Player reconnected:' : 'New player joined:', username, playerId);
             socket.join(game.id);
             broadcastState();
         } else {
@@ -112,23 +109,17 @@ io.on('connection', (socket) => {
         }
 
         if (player) {
-            console.log('Player left explicitly:', player.name, player.id);
             game.removePlayer(player.id);
-            io.emit('gameState', game.getGameStateForPlayer(null)); // Broadcast to all
-        } else {
-            console.log('Could not find player to remove:', socket.id, data);
+            broadcastState(); // Use room-safe broadcast
         }
         // Acknowledge receipt
         if (typeof callback === 'function') callback();
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
         game.handleDisconnect(socket.id);
+        // Only broadcast to the game room
         io.to(game.id).emit('gameState', game.getGameStateForPlayer(null));
-
-        // Note: We don't delete game immediately anymore to allow reconnect
-        // maybe set a timeout? For now, infinite wait.
     });
 });
 

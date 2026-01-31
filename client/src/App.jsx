@@ -28,12 +28,14 @@ function App() {
 
   const t = translations[language];
 
+  // Track if we've already attempted an auto-rejoin for this connection
+  const hasAttemptedRejoin = React.useRef(false);
+
   useEffect(() => {
     socket.on('connect', () => {
       setIsConnected(true);
       setServerError('');
-
-      // Don't auto-rejoin here - wait for gameState to decide
+      hasAttemptedRejoin.current = false; // Reset on new connection
     });
 
     socket.on('disconnect', () => {
@@ -41,14 +43,29 @@ function App() {
     });
 
     socket.on('gameState', (state) => {
-      // Auto-rejoin ONLY if we're already in the players list but disconnected
-      if (myPlayerId && state?.players) {
+      // Auto-rejoin ONLY if:
+      // 1. We have a player ID
+      // 2. We haven't tried rejoining on THIS socket connection yet
+      // 3. The server shows us as disconnected
+      if (myPlayerId && !hasAttemptedRejoin.current && state?.players) {
         const existingPlayer = state.players.find(p => p.id === myPlayerId);
+
+        // If we are in the list but marked as disconnected, try to rejoin ONCE after a small delay
         if (existingPlayer && !existingPlayer.connected) {
-          socket.emit('joinGame', {
-            username: localStorage.getItem('uno_player_name') || existingPlayer.name || 'Player',
-            playerId: myPlayerId
-          });
+          console.log('Detected disconnected state. Scheduled auto-rejoin in 1s...');
+          hasAttemptedRejoin.current = true; // Mark as attempted immediately to prevent double-schedule
+          setTimeout(() => {
+            socket.emit('joinGame', {
+              username: localStorage.getItem('uno_player_name') || existingPlayer.name || 'Player',
+              playerId: myPlayerId
+            });
+          }, 1000); // 1s delay to let server settle
+        } else if (existingPlayer && existingPlayer.connected && existingPlayer.socketId !== socket.id) {
+          // IMPORTANT: If we are "connected" but with a DIFFERENT socket ID, 
+          // it means another tab/window is using our ID. 
+          // DO NOT try to auto-hijack it here, as it causes an infinite loop between tabs.
+          console.warn('Session is active in another tab. Auto-rejoin disabled to prevent loop.');
+          hasAttemptedRejoin.current = true; // Stop trying
         }
       }
 
