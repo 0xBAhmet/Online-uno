@@ -58,11 +58,8 @@ io.on('connection', (socket) => {
     socket.on('playCard', ({ cardIndex, declaredColor }) => {
         const result = game.playCard(socket.id, cardIndex, declaredColor);
         if (result.success) {
-            if (result.message) {
-                // Game Over or special event
-                if (game.status === 'finished') {
-                    io.to(game.id).emit('gameOver', { winner: result.winner });
-                }
+            if (game.status === 'finished') {
+                io.to(game.id).emit('gameOver', { winner: result.winner });
             }
             game.players.forEach(p => {
                 io.to(p.id).emit('gameState', game.getGameStateForPlayer(p.id));
