@@ -1,0 +1,42 @@
+export const translations = {
+    tr: {
+        loading: 'Yükleniyor...',
+        roomFull: 'Oda Dolu',
+        joinGame: 'Oyuna Katıl',
+        enterName: 'Adını Gir',
+        players: 'Oyuncular',
+        waitingForPlayers: 'Oyuncular Bekleniyor...',
+        startGame: 'Oyunu Başlat',
+        yourTurn: 'SENİN SIRAN',
+        thinking: 'Düşünüyor...',
+        score: 'Puan',
+        myScore: 'Puanım',
+        endGame: 'Oyunu Bitir',
+        endGameConfirm: 'Oyunu herkes için bitirmek istediğine emin misin?',
+        won: 'Kazandı',
+        gameOver: 'OYUN BİTTİ',
+        returnToLobby: 'Lobiye Dön',
+        chooseColor: 'Renk Seç',
+        unoServerRunning: 'Uno Sunucusu Çalışıyor! 🚀'
+    },
+    en: {
+        loading: 'Loading...',
+        roomFull: 'Room Full',
+        joinGame: 'Join Game',
+        enterName: 'Enter Name',
+        players: 'Players',
+        waitingForPlayers: 'Waiting for Players...',
+        startGame: 'Start Game',
+        yourTurn: 'YOUR TURN',
+        thinking: 'Thinking...',
+        score: 'Score',
+        myScore: 'My Score',
+        endGame: 'End Game',
+        endGameConfirm: 'Are you sure you want to end the game for everyone?',
+        won: 'Won',
+        gameOver: 'GAME OVER',
+        returnToLobby: 'Return to Lobby',
+        chooseColor: 'Choose Color',
+        unoServerRunning: 'Uno Server is Running! 🚀'
+    }
+};

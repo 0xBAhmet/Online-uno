@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Lobby = ({ socket, isInLobby, players = [] }) => {
+const Lobby = ({ socket, isInLobby, players = [], t }) => {
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
 
@@ -23,20 +23,20 @@ const Lobby = ({ socket, isInLobby, players = [] }) => {
 
             {!players.find(p => p.id === socket.id) ? (
                 <form onSubmit={handleJoin} className="lobby-form glass-panel">
-                    <h2>Enter Lobby</h2>
+                    <h2>{t.joinGame}</h2>
                     <input
                         type="text"
-                        placeholder="Your Nickname"
+                        placeholder={t.enterName}
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className="input-field"
                     />
-                    <button type="submit" className="btn-primary">Join Game</button>
+                    <button type="submit" className="btn-primary">{t.joinGame}</button>
                     {error && <p style={{ color: 'red' }}>{error}</p>}
                 </form>
             ) : (
                 <div className="lobby-form glass-panel" style={{ width: '400px' }}>
-                    <h2>Waiting Room</h2>
+                    <h2>{t.players}</h2>
                     <ul className="player-list">
                         {players.map((p, index) => (
                             <li key={index} className="player-item">
@@ -46,9 +46,9 @@ const Lobby = ({ socket, isInLobby, players = [] }) => {
                         ))}
                     </ul>
                     {players.length >= 2 ? (
-                        <button onClick={handleStart} className="btn-primary btn-success">START GAME</button>
+                        <button onClick={handleStart} className="btn-primary btn-success">{t.startGame}</button>
                     ) : (
-                        <p style={{ textAlign: 'center', color: '#aaa' }}>Waiting for more players ({players.length}/4)...</p>
+                        <p style={{ textAlign: 'center', color: '#aaa' }}>{t.waitingForPlayers} ({players.length}/4)...</p>
                     )}
                 </div>
             )}

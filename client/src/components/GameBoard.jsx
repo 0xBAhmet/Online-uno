@@ -23,7 +23,7 @@ const Card = ({ card, onClick, className = '' }) => {
     );
 };
 
-const GameBoard = ({ socket, gameState, myId }) => {
+const GameBoard = ({ socket, gameState, myId, t }) => {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [pendingCardIndex, setPendingCardIndex] = useState(null);
 
@@ -62,7 +62,7 @@ const GameBoard = ({ socket, gameState, myId }) => {
             {/* Top Right: End Game Button */}
             <button
                 onClick={() => {
-                    if (confirm('Are you sure you want to end the game for everyone?')) {
+                    if (confirm(t.endGameConfirm)) {
                         socket.emit('returnToLobby');
                     }
                 }}
@@ -81,7 +81,7 @@ const GameBoard = ({ socket, gameState, myId }) => {
                     fontSize: '0.9rem'
                 }}
             >
-                End Game
+                {t.endGame}
             </button>
 
             {/* Top: Opponents */}
@@ -104,9 +104,9 @@ const GameBoard = ({ socket, gameState, myId }) => {
                             fontSize: '0.8rem',
                             fontWeight: 'bold'
                         }}>
-                            🏆 Score: {p.score}
+                            🏆 {t.score}: {p.score}
                         </div>
-                        {gameState.currentPlayer === p.id && <div style={{ color: 'lime', fontWeight: 'bold' }}>Thinking...</div>}
+                        {gameState.currentPlayer === p.id && <div style={{ color: 'lime', fontWeight: 'bold' }}>{t.thinking}</div>}
                     </div>
                 ))}
             </div>
@@ -163,7 +163,7 @@ const GameBoard = ({ socket, gameState, myId }) => {
 
             {/* Bottom: My Hand */}
             <div className="player-hand-container">
-                {isMyTurn && <div className="turn-indicator active-turn">YOUR TURN</div>}
+                {isMyTurn && <div className="turn-indicator active-turn">{t.yourTurn}</div>}
 
                 <div className="player-hand">
                     {myPlayer && myPlayer.hand && myPlayer.hand.map((card, index) => (
@@ -190,7 +190,7 @@ const GameBoard = ({ socket, gameState, myId }) => {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                 zIndex: 2000
             }}>
-                🏆 My Score: {myPlayer?.score || 0}
+                🏆 {t.myScore}: {myPlayer?.score || 0}
             </div>
 
             {/* Color Picker Modal */}
@@ -200,7 +200,7 @@ const GameBoard = ({ socket, gameState, myId }) => {
                 showColorPicker && (
                     <div className="color-picker-overlay">
                         <div className="glass-panel" style={{ padding: '2rem' }}>
-                            <h2>Choose Color</h2>
+                            <h2>{t.chooseColor}</h2>
                             <div className="color-options">
                                 <button className="color-btn" style={{ background: 'var(--card-red)' }} onClick={() => handleColorSelect('red')}></button>
                                 <button className="color-btn" style={{ background: 'var(--card-blue)' }} onClick={() => handleColorSelect('blue')}></button>
