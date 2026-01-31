@@ -8,6 +8,11 @@ const app = express();
 app.use(cors());
 
 const server = http.createServer(app);
+
+app.get('/', (req, res) => {
+    res.send('Uno Server is Running! 🚀');
+});
+
 const io = new Server(server, {
     cors: {
         origin: "*",
