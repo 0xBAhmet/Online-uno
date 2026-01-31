@@ -159,8 +159,17 @@ function App() {
         <button
           onClick={() => {
             if (confirm('Tüm bilgilerini silip çıkmak istiyor musun?')) {
-              localStorage.removeItem('uno_player_id');
-              window.location.reload();
+              // Notify server to remove me, wait for ACK
+              socket.emit('leaveGame', {}, () => {
+                localStorage.removeItem('uno_player_id');
+                window.location.reload();
+              });
+
+              // Fallback if server doesn't respond fast
+              setTimeout(() => {
+                localStorage.removeItem('uno_player_id');
+                window.location.reload();
+              }, 500);
             }
           }}
           style={{
