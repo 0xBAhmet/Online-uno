@@ -32,6 +32,15 @@ function App() {
     socket.on('connect', () => {
       setIsConnected(true);
       setServerError('');
+
+      // Auto-rejoin if we have a player ID (reconnection scenario)
+      if (myPlayerId) {
+        console.log('Auto-rejoining with ID:', myPlayerId);
+        socket.emit('joinGame', {
+          username: localStorage.getItem('uno_player_name') || 'Player',
+          playerId: myPlayerId
+        });
+      }
     });
 
     socket.on('disconnect', () => {
@@ -61,7 +70,7 @@ function App() {
       socket.off('gameOver');
       socket.off('error');
     };
-  }, []);
+  }, [myPlayerId]);
 
   // Derived state for view switching
   const isInLobby = gameState && (gameState.status === 'waiting' || gameState.status === 'finished');
