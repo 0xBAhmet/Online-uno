@@ -95,6 +95,17 @@ const GameBoard = ({ socket, gameState, myId }) => {
                             ))}
                         </div>
                         <div style={{ marginTop: '5px' }}>× {p.handCount}</div>
+                        <div style={{
+                            marginTop: '5px',
+                            background: '#ffc107',
+                            color: 'black',
+                            padding: '2px 8px',
+                            borderRadius: '10px',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold'
+                        }}>
+                            🏆 Score: {p.score}
+                        </div>
                         {gameState.currentPlayer === p.id && <div style={{ color: 'lime', fontWeight: 'bold' }}>Thinking...</div>}
                     </div>
                 ))}
@@ -166,23 +177,43 @@ const GameBoard = ({ socket, gameState, myId }) => {
                 </div>
             </div>
 
+            {/* My Score Display */}
+            <div style={{
+                position: 'absolute',
+                bottom: '10px',
+                right: '10px',
+                background: '#ffc107',
+                color: 'black',
+                padding: '5px 12px',
+                borderRadius: '15px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                zIndex: 2000
+            }}>
+                🏆 My Score: {myPlayer?.score || 0}
+            </div>
+
             {/* Color Picker Modal */}
-            {showColorPicker && (
-                <div className="color-picker-overlay">
-                    <div className="glass-panel" style={{ padding: '2rem' }}>
-                        <h2>Choose Color</h2>
-                        <div className="color-options">
-                            <button className="color-btn" style={{ background: 'var(--card-red)' }} onClick={() => handleColorSelect('red')}></button>
-                            <button className="color-btn" style={{ background: 'var(--card-blue)' }} onClick={() => handleColorSelect('blue')}></button>
-                            <button className="color-btn" style={{ background: 'var(--card-green)' }} onClick={() => handleColorSelect('green')}></button>
-                            <button className="color-btn" style={{ background: 'var(--card-yellow)' }} onClick={() => handleColorSelect('yellow')}></button>
+
+            {/* Color Picker Modal */}
+            {
+                showColorPicker && (
+                    <div className="color-picker-overlay">
+                        <div className="glass-panel" style={{ padding: '2rem' }}>
+                            <h2>Choose Color</h2>
+                            <div className="color-options">
+                                <button className="color-btn" style={{ background: 'var(--card-red)' }} onClick={() => handleColorSelect('red')}></button>
+                                <button className="color-btn" style={{ background: 'var(--card-blue)' }} onClick={() => handleColorSelect('blue')}></button>
+                                <button className="color-btn" style={{ background: 'var(--card-green)' }} onClick={() => handleColorSelect('green')}></button>
+                                <button className="color-btn" style={{ background: 'var(--card-yellow)' }} onClick={() => handleColorSelect('yellow')}></button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Game Over / Status Messages could go here */}
-        </div>
+        </div >
     );
 };
 

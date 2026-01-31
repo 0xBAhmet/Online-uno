@@ -72,7 +72,8 @@ class Game {
     addPlayer(id, name) {
         if (this.status !== 'waiting') return false;
         if (this.players.length >= 4) return false; // Max 4 players
-        this.players.push({ id, name, hand: [] });
+        // Add score: 0 to new player
+        this.players.push({ id, name, hand: [], score: 0 });
         return true;
     }
 
@@ -94,7 +95,7 @@ class Game {
     }
 
     restart() {
-        // Reset game state but keep players
+        // Reset game state but keep players AND SCORES
         this.status = 'waiting';
         this.deck.reset();
         this.discardPile = [];
@@ -210,6 +211,7 @@ class Game {
         // Check Win
         if (player.hand.length === 0) {
             this.status = 'finished';
+            player.score += 1; // INCREMENT SCORE
             return { success: true, winner: player.id };
         }
 
@@ -276,6 +278,7 @@ class Game {
             players: this.players.map(p => ({
                 id: p.id,
                 name: p.name,
+                score: p.score || 0, // Include Score
                 handCount: p.hand.length,
                 hand: p.id === playerId ? p.hand : undefined
             })),
