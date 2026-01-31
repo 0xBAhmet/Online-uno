@@ -17,6 +17,8 @@ export const translations = {
         gameOver: 'OYUN BİTTİ',
         returnToLobby: 'Lobiye Dön',
         chooseColor: 'Renk Seç',
+        kick: 'At',
+        vote: 'Oy',
         unoServerRunning: 'Uno Sunucusu Çalışıyor! 🚀'
     },
     en: {
@@ -37,6 +39,8 @@ export const translations = {
         gameOver: 'GAME OVER',
         returnToLobby: 'Return to Lobby',
         chooseColor: 'Choose Color',
+        kick: 'Kick',
+        vote: 'Vote',
         unoServerRunning: 'Uno Server is Running! 🚀'
     }
 };

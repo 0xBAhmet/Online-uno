@@ -69,16 +69,96 @@ class Game {
         this.accumulatedDraw = 0; // NEW: Track stacked draws
     }
 
-    addPlayer(id, name) {
-        if (this.status !== 'waiting') return false;
-        if (this.players.length >= 4) return false; // Max 4 players
-        // Add score: 0 to new player
-        this.players.push({ id, name, hand: [], score: 0 });
-        return true;
+    /**
+     * @param {string} socketId - Ephemeral Socket ID
+     * @param {string} name - Player Name
+     * @param {string} stableId - Persistent Client ID (UUID)
+     */
+    addPlayer(socketId, name, stableId) {
+        // Check if player exists (Reconnection)
+        const existingPlayer = this.players.find(p => p.id === stableId);
+
+        if (existingPlayer) {
+            // Reconnect
+            existingPlayer.socketId = socketId;
+            existingPlayer.connected = true;
+            existingPlayer.name = name; // Update name if changed
+            return { success: true, isReconnect: true };
+        }
+
+        if (this.status !== 'waiting') return { success: false, message: 'Game started' };
+        if (this.players.length >= 4) return { success: false, message: 'Room full' }; // Max 4 players
+
+        // Add new player
+        // id = stableId (Logic ID), socketId = transport ID
+        this.players.push({
+            id: stableId,
+            socketId: socketId,
+            name,
+            hand: [],
+            score: 0,
+            connected: true
+        });
+        return { success: true, isReconnect: false };
     }
 
-    removePlayer(id) {
-        this.players = this.players.filter(p => p.id !== id);
+    handleDisconnect(socketId) {
+        const player = this.players.find(p => p.socketId === socketId);
+        if (player) {
+            player.connected = false;
+        }
+        // Do NOT remove player. Wait for reconnect or kick.
+        // If all players disconnect, maybe reset? For now, keep state.
+    }
+
+    // Returns true if kicked
+    voteKick(targetId, voterId) {
+        const target = this.players.find(p => p.id === targetId);
+        const voter = this.players.find(p => p.id === voterId);
+
+        if (!target || !voter) return false;
+        if (targetId === voterId) return false; // Can't kick self
+
+        // Initialize votes if needed
+        if (!target.kickVotes) target.kickVotes = [];
+
+        // Toggle vote (if already voted, remove vote? Or just add. Let's strictly add for now)
+        if (!target.kickVotes.includes(voterId)) {
+            target.kickVotes.push(voterId);
+        }
+
+        // Check Threshold: > 50% of *Connected* players (excluding target?) 
+        // User rule: "oy birliğiyle" (unanimous?) or "oylama başlatıp".
+        // Let's use Majority (>50%).
+        const connectedPlayers = this.players.filter(p => p.connected).length;
+        const votesNeeded = Math.floor(connectedPlayers / 2) + 1;
+
+        if (target.kickVotes.length >= votesNeeded) {
+            this.removePlayer(targetId);
+            return true;
+        }
+        return false;
+    }
+
+    // Explicit Kick or Timeout
+    removePlayer(stableId) {
+        const playerIndex = this.players.findIndex(p => p.id === stableId);
+        if (playerIndex === -1) return;
+
+        const player = this.players[playerIndex];
+
+        // If it was this player's turn, advance turn
+        if (this.status === 'playing' && playerIndex === this.currentPlayerIndex) {
+            this.advanceTurn();
+        }
+
+        this.players = this.players.filter(p => p.id !== stableId);
+
+        // Clear votes from this player on others? Optional.
+        this.players.forEach(p => {
+            if (p.kickVotes) p.kickVotes = p.kickVotes.filter(vID => vID !== stableId);
+        });
+
         if (this.players.length === 0) {
             this.resetGame();
         }
@@ -279,6 +359,8 @@ class Game {
                 id: p.id,
                 name: p.name,
                 score: p.score || 0, // Include Score
+                isConnected: p.connected, // Show connection status
+                voteCount: p.kickVotes ? p.kickVotes.length : 0, // Show votes
                 handCount: p.hand.length,
                 hand: p.id === playerId ? p.hand : undefined
             })),

@@ -12,6 +12,13 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [winner, setWinner] = useState(null);
   const [language, setLanguage] = useState('tr'); // Default Turkish
+  const [myPlayerId, setMyPlayerId] = useState(() => {
+    const stored = localStorage.getItem('uno_player_id');
+    if (stored) return stored;
+    const newId = 'player_' + Math.random().toString(36).substr(2, 9) + Date.now();
+    localStorage.setItem('uno_player_id', newId);
+    return newId;
+  });
 
   const t = translations[language];
 
@@ -84,6 +91,7 @@ function App() {
           isInLobby={isInLobby}
           players={gameState.players}
           t={t}
+          myPlayerId={myPlayerId}
         />
       )}
 
@@ -91,7 +99,7 @@ function App() {
         <GameBoard
           socket={socket}
           gameState={gameState}
-          myId={socket.id}
+          myId={myPlayerId} // Using Stable ID now
           t={t}
         />
       )}

@@ -106,6 +106,30 @@ const GameBoard = ({ socket, gameState, myId, t }) => {
                         }}>
                             🏆 {t.score}: {p.score}
                         </div>
+
+                        {/* Status & Kick */}
+                        <div style={{ marginTop: '5px', fontSize: '0.8rem' }}>
+                            {!p.isConnected && <span style={{ color: 'red' }}>⚠ Offline</span>}
+                            {p.voteCount > 0 && <span style={{ color: 'orange', marginLeft: '5px' }}>({p.voteCount} {t.vote})</span>}
+
+                            {/* Kick Button: Only if I am not this player */}
+                            <button
+                                onClick={() => socket.emit('voteKick', { targetId: p.id })}
+                                style={{
+                                    marginLeft: '5px',
+                                    background: 'rgba(255,0,0,0.3)',
+                                    border: '1px solid red',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '0.7rem',
+                                    padding: '2px 5px',
+                                    borderRadius: '4px'
+                                }}
+                            >
+                                {t.kick}
+                            </button>
+                        </div>
+
                         {gameState.currentPlayer === p.id && <div style={{ color: 'lime', fontWeight: 'bold' }}>{t.thinking}</div>}
                     </div>
                 ))}

@@ -31,18 +31,24 @@ io.on('connection', (socket) => {
     // Send initial state so client stops loading
     socket.emit('gameState', game.getGameStateForPlayer(null));
 
-    socket.on('joinGame', ({ username }) => {
-        const success = game.addPlayer(socket.id, username);
-        if (success) {
-            socket.join(game.id);
-            io.to(game.id).emit('gameState', game.getGameStateForPlayer(null)); // Broadcast generic state (players list)
+    socket.on('joinGame', ({ username, playerId }) => {
+        // playerId is the stable UUID from client
+        const result = game.addPlayer(socket.id, username, playerId);
+
+        if (result.success) {
+            socket.join(game.id); // Valid for both new and reconnect
+
+            // Broadcast generic state
+            io.to(game.id).emit('gameState', game.getGameStateForPlayer(null));
 
             // Send specific state to each player
             game.players.forEach(p => {
-                io.to(p.id).emit('gameState', game.getGameStateForPlayer(p.id));
+                if (p.connected && p.socketId) {
+                    io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
+                }
             });
         } else {
-            socket.emit('error', 'Could not join game (Full or Started)');
+            socket.emit('error', result.message || 'Could not join game');
         }
     });
 
@@ -50,19 +56,23 @@ io.on('connection', (socket) => {
         const success = game.start();
         if (success) {
             game.players.forEach(p => {
-                io.to(p.id).emit('gameState', game.getGameStateForPlayer(p.id));
+                if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
             });
         }
     });
 
     socket.on('playCard', ({ cardIndex, declaredColor }) => {
-        const result = game.playCard(socket.id, cardIndex, declaredColor);
+        // Find player by socketId to get stableId
+        const player = game.players.find(p => p.socketId === socket.id);
+        if (!player) return;
+
+        const result = game.playCard(player.id, cardIndex, declaredColor);
         if (result.success) {
             if (game.status === 'finished') {
                 io.to(game.id).emit('gameOver', { winner: result.winner });
             }
             game.players.forEach(p => {
-                io.to(p.id).emit('gameState', game.getGameStateForPlayer(p.id));
+                if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
             });
         } else {
             socket.emit('error', result.message);
@@ -70,34 +80,50 @@ io.on('connection', (socket) => {
     });
 
     socket.on('drawCard', () => {
-        game.playerDraw(socket.id);
+        const player = game.players.find(p => p.socketId === socket.id);
+        if (!player) return;
+
+        game.playerDraw(player.id);
         game.players.forEach(p => {
-            io.to(p.id).emit('gameState', game.getGameStateForPlayer(p.id));
+            if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
         });
     });
 
     socket.on('returnToLobby', ({ isGameOver } = {}) => {
-        // Prevent late 'returnToLobby' (from Game Over screen) from killing a NEWLY started game
+        const player = game.players.find(p => p.socketId === socket.id);
+        // Note: Even disconnected players might trigger this locally if they reconnect? 
+        // No, this is an action.
+
         if (isGameOver && game.status === 'playing') {
-            // Do nothing, just update this player's view? 
-            // Better: Send them the current game state so they join the active game
-            socket.emit('gameState', game.getGameStateForPlayer(socket.id));
+            socket.emit('gameState', game.getGameStateForPlayer(player ? player.id : null));
             return;
         }
 
-        // Otherwise (Manual 'End Game' OR valid return from Game Over), restart/lobby
         game.restart();
         io.to(game.id).emit('gameState', game.getGameStateForPlayer(null));
     });
 
+    socket.on('voteKick', ({ targetId }) => {
+        const player = game.players.find(p => p.socketId === socket.id);
+        if (!player) return;
+
+        const kicked = game.voteKick(targetId, player.id);
+
+        // Broadcast update
+        game.players.forEach(p => {
+            if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
+        });
+
+        // If kicked, we might want to notify specifically, but gameState update implies removal
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        game.removePlayer(socket.id);
+        game.handleDisconnect(socket.id);
         io.to(game.id).emit('gameState', game.getGameStateForPlayer(null));
-        // Logic for handling disconnect mid-game is tricky, resetting for now
-        if (game.players.length === 0) { // Reset if empty
-            game = new Game('room1');
-        }
+
+        // Note: We don't delete game immediately anymore to allow reconnect
+        // maybe set a timeout? For now, infinite wait.
     });
 });
 

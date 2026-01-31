@@ -40,8 +40,13 @@ const Lobby = ({ socket, isInLobby, players = [], t }) => {
                     <ul className="player-list">
                         {players.map((p, index) => (
                             <li key={index} className="player-item">
-                                <span>{p.name} {p.id === socket.id ? '(You)' : ''}</span>
-                                <span style={{ color: '#aaa' }}>Ready</span>
+                                <span>
+                                    {p.name} {p.id === myPlayerId ? '(You)' : ''}
+                                    {!p.isConnected && <span style={{ color: 'red', marginLeft: '5px' }}>(Offline)</span>}
+                                </span>
+                                <span style={{ color: p.isConnected ? '#aaa' : 'red' }}>
+                                    {p.isConnected ? 'Ready' : 'Disconnected'}
+                                </span>
                             </li>
                         ))}
                     </ul>
