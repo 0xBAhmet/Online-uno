@@ -73,12 +73,14 @@ function App() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        background: '#1a1a2e',
+        background: '#222', // Slightly lighter
         color: 'white',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        border: '5px solid red' // debug border
       }}>
-        <h1>{t.loading}</h1>
-        {!isConnected && <p style={{ color: 'gray' }}>Connecting to server...</p>}
+        <h1>LOADING... (Debug Mode)</h1>
+        <p>Connection: {isConnected ? 'Connected' : 'Disconnected'}</p>
+        <p>Wait...</p>
       </div>
     );
   }
@@ -153,6 +155,27 @@ function App() {
           t={t}
         />
       )}
+      <div style={{ position: 'absolute', bottom: '10px', left: '10px', zIndex: 3000 }}>
+        <button
+          onClick={() => {
+            if (confirm('Tüm bilgilerini silip çıkmak istiyor musun?')) {
+              localStorage.removeItem('uno_player_id');
+              window.location.reload();
+            }
+          }}
+          style={{
+            background: 'rgba(255,0,0,0.5)',
+            color: 'white',
+            border: 'none',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}
+        >
+          🗑️ Çıkış Yap / Sıfırla
+        </button>
+      </div>
     </>
   );
 }

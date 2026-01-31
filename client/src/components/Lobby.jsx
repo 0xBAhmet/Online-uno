@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Lobby = ({ socket, isInLobby, players = [], t }) => {
+const Lobby = ({ socket, isInLobby, players = [], t, myPlayerId }) => {
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
 
