@@ -21,7 +21,7 @@ const Lobby = ({ socket, isInLobby, players = [], t }) => {
         <div className="lobby-container">
             <h1 className="lobby-title">UNO ONLINE</h1>
 
-            {!players.find(p => p.id === socket.id) ? (
+            {!players.find(p => p.id === myPlayerId) ? (
                 <form onSubmit={handleJoin} className="lobby-form glass-panel">
                     <h2>{t.joinGame}</h2>
                     <input

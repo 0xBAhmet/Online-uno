@@ -5,7 +5,12 @@ import GameBoard from './components/GameBoard';
 
 import { translations } from './translations';
 
-const socket = io('https://jimmyhummluk-uno-online.hf.space'); // Ensure this matches server port
+// Auto-switch between Localhost and Production Server
+const SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3000'
+  : 'https://jimmyhummluk-uno-online.hf.space';
+
+const socket = io(SERVER_URL);
 
 function App() {
   const [gameState, setGameState] = useState(null);
