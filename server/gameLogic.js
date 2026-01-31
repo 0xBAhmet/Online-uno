@@ -75,8 +75,11 @@ class Game {
      * @param {string} stableId - Persistent Client ID (UUID)
      */
     addPlayer(socketId, name, stableId) {
+        // Fallback for backward compatibility or missing ID
+        const logicId = stableId || socketId;
+
         // Check if player exists (Reconnection)
-        const existingPlayer = this.players.find(p => p.id === stableId);
+        const existingPlayer = this.players.find(p => p.id === logicId);
 
         if (existingPlayer) {
             // Reconnect
@@ -90,9 +93,9 @@ class Game {
         if (this.players.length >= 4) return { success: false, message: 'Room full' }; // Max 4 players
 
         // Add new player
-        // id = stableId (Logic ID), socketId = transport ID
+        // id = logicId (Logic ID), socketId = transport ID
         this.players.push({
-            id: stableId,
+            id: logicId,
             socketId: socketId,
             name,
             hand: [],
