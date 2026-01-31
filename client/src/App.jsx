@@ -41,14 +41,10 @@ function App() {
     });
 
     socket.on('gameState', (state) => {
-      console.log('Game State Received:', state);
-      console.log('Status:', state?.status, 'Players:', state?.players?.length, 'My ID:', myPlayerId);
-
       // Auto-rejoin ONLY if we're already in the players list but disconnected
       if (myPlayerId && state?.players) {
         const existingPlayer = state.players.find(p => p.id === myPlayerId);
         if (existingPlayer && !existingPlayer.connected) {
-          console.log('Reconnecting to existing session...');
           socket.emit('joinGame', {
             username: localStorage.getItem('uno_player_name') || existingPlayer.name || 'Player',
             playerId: myPlayerId
@@ -84,19 +80,16 @@ function App() {
 
   if (!gameState) {
     return (
-      <div style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        background: '#222', // Slightly lighter
-        color: 'white',
-        flexDirection: 'column',
-        border: '5px solid red' // debug border
-      }}>
-        <h1>LOADING... (Debug Mode)</h1>
-        <p>Connection: {isConnected ? 'Connected' : 'Disconnected'}</p>
-        <p>Wait...</p>
+      <div className="loading-container">
+        <div className="loading-card-stack">
+          <div className="loading-card red scale-up-center">UNO</div>
+          <div className="loading-card blue scale-up-center" style={{ animationDelay: '0.2s' }}>UNO</div>
+          <div className="loading-card green scale-up-center" style={{ animationDelay: '0.4s' }}>UNO</div>
+        </div>
+        <h2 style={{ marginTop: '2rem', color: 'white' }}>{t.loading}...</h2>
+        <p style={{ color: isConnected ? '#4caf50' : '#f44336' }}>
+          {isConnected ? '✓ Server Connected' : '⚠ Connecting to Server...'}
+        </p>
       </div>
     );
   }

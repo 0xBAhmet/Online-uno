@@ -365,15 +365,14 @@ class Game {
     }
 
     getGameStateForPlayer(playerId) {
-        // Hide other players' hands
         return {
             id: this.id,
             players: this.players.map(p => ({
                 id: p.id,
                 name: p.name,
-                score: p.score || 0, // Include Score
-                isConnected: p.connected, // Show connection status
-                voteCount: p.kickVotes ? p.kickVotes.length : 0, // Show votes
+                score: p.score || 0,
+                isConnected: p.connected,
+                voteCount: p.kickVotes ? p.kickVotes.length : 0,
                 handCount: p.hand.length,
                 hand: p.id === playerId ? p.hand : undefined
             })),
@@ -382,7 +381,7 @@ class Game {
             currentPlayer: this.players[this.currentPlayerIndex]?.id,
             status: this.status,
             direction: this.direction,
-            accumulatedDraw: this.accumulatedDraw // Send this to client
+            accumulatedDraw: this.accumulatedDraw
         };
     }
 }

@@ -25,6 +25,15 @@ const PORT = process.env.PORT || 3000;
 // Simple single game instance for now
 let game = new Game('room1');
 
+// Constant-helper to broadcast state to all relevant players
+const broadcastState = () => {
+    game.players.forEach(p => {
+        if (p.connected && p.socketId) {
+            io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
+        }
+    });
+};
+
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
@@ -32,35 +41,24 @@ io.on('connection', (socket) => {
     socket.emit('gameState', game.getGameStateForPlayer(null));
 
     socket.on('joinGame', ({ username, playerId }) => {
-        // playerId is the stable UUID from client
         const result = game.addPlayer(socket.id, username, playerId);
 
         if (result.success) {
             console.log(result.isReconnect ? 'Player reconnected:' : 'New player joined:', username, playerId);
-            socket.join(game.id); // Valid for both new and reconnect
-
-            // Send specific state to each player (including the one who just joined/reconnected)
-            game.players.forEach(p => {
-                if (p.connected && p.socketId) {
-                    io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
-                }
-            });
+            socket.join(game.id);
+            broadcastState();
         } else {
             socket.emit('error', result.message || 'Could not join game');
         }
     });
 
     socket.on('startGame', () => {
-        const success = game.start();
-        if (success) {
-            game.players.forEach(p => {
-                if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
-            });
+        if (game.start()) {
+            broadcastState();
         }
     });
 
     socket.on('playCard', ({ cardIndex, declaredColor }) => {
-        // Find player by socketId to get stableId
         const player = game.players.find(p => p.socketId === socket.id);
         if (!player) return;
 
@@ -69,9 +67,7 @@ io.on('connection', (socket) => {
             if (game.status === 'finished') {
                 io.to(game.id).emit('gameOver', { winner: result.winner });
             }
-            game.players.forEach(p => {
-                if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
-            });
+            broadcastState();
         } else {
             socket.emit('error', result.message);
         }
@@ -79,12 +75,10 @@ io.on('connection', (socket) => {
 
     socket.on('drawCard', () => {
         const player = game.players.find(p => p.socketId === socket.id);
-        if (!player) return;
-
-        game.playerDraw(player.id);
-        game.players.forEach(p => {
-            if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
-        });
+        if (player) {
+            game.playerDraw(player.id);
+            broadcastState();
+        }
     });
 
     socket.on('returnToLobby', ({ isGameOver } = {}) => {
@@ -103,16 +97,11 @@ io.on('connection', (socket) => {
 
     socket.on('voteKick', ({ targetId }) => {
         const player = game.players.find(p => p.socketId === socket.id);
-        if (!player) return;
-
-        const kicked = game.voteKick(targetId, player.id);
-
-        // Broadcast update
-        game.players.forEach(p => {
-            if (p.connected && p.socketId) io.to(p.socketId).emit('gameState', game.getGameStateForPlayer(p.id));
-        });
-
-        // If kicked, we might want to notify specifically, but gameState update implies removal
+        if (player && game.voteKick(targetId, player.id)) {
+            // If someone was kicked, we could send a specific notification,
+            // but broadcastState handles the removal from player lists.
+        }
+        broadcastState();
     });
 
     socket.on('leaveGame', (data, callback) => {

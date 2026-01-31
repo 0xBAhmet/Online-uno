@@ -18,6 +18,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -46,9 +47,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -59,10 +62,88 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
+  }
+}
+
+/* Loading Animation */
+.loading-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle, #2c3e50, #000000);
+  overflow: hidden;
+}
+
+.loading-card-stack {
+  position: relative;
+  width: 100px;
+  height: 150px;
+}
+
+.loading-card {
+  position: absolute;
+  width: 80px;
+  height: 120px;
+  border-radius: 10px;
+  border: 4px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.loading-card.red {
+  background: #f44336;
+  transform: rotate(-10deg);
+  z-index: 3;
+}
+
+.loading-card.blue {
+  background: #2196f3;
+  transform: rotate(5deg);
+  left: 10px;
+  top: 5px;
+  z-index: 2;
+}
+
+.loading-card.green {
+  background: #4caf50;
+  transform: rotate(20deg);
+  left: 20px;
+  top: 10px;
+  z-index: 1;
+}
+
+.scale-up-center {
+  animation: scale-up-center 1.5s cubic-bezier(0.390, 0.575, 0.565, 1.000) infinite both;
+}
+
+@keyframes scale-up-center {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.5);
+    opacity: 0;
   }
 }
