@@ -63,7 +63,7 @@ const GameBoard = ({ socket, gameState, myId, t }) => {
             <button
                 onClick={() => {
                     if (confirm(t.endGameConfirm)) {
-                        socket.emit('returnToLobby');
+                        socket.emit('returnToLobby', { isGameOver: false });
                     }
                 }}
                 style={{

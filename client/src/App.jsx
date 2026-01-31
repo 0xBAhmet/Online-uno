@@ -71,7 +71,7 @@ function App() {
             <h1>{t.gameOver}</h1>
             <h2>{t.won}: {gameState.players.find(p => p.id === winner)?.name || 'Unknown'}</h2>
             <button className="btn-primary" onClick={() => {
-              socket.emit('returnToLobby');
+              socket.emit('returnToLobby', { isGameOver: true });
               setWinner(null);
             }}>{t.returnToLobby}</button>
           </div>

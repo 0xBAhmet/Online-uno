@@ -76,11 +76,18 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on('returnToLobby', () => {
-        // Only host or first player should ideally trigger this, or vote. 
-        // For simplicity, any player triggering this restarts for everyone.
+    socket.on('returnToLobby', ({ isGameOver } = {}) => {
+        // Prevent late 'returnToLobby' (from Game Over screen) from killing a NEWLY started game
+        if (isGameOver && game.status === 'playing') {
+            // Do nothing, just update this player's view? 
+            // Better: Send them the current game state so they join the active game
+            socket.emit('gameState', game.getGameStateForPlayer(socket.id));
+            return;
+        }
+
+        // Otherwise (Manual 'End Game' OR valid return from Game Over), restart/lobby
         game.restart();
-        io.to(game.id).emit('gameState', game.getGameStateForPlayer(null)); // Broadcast new lobby state
+        io.to(game.id).emit('gameState', game.getGameStateForPlayer(null));
     });
 
     socket.on('disconnect', () => {
