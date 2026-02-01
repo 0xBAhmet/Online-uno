@@ -101,6 +101,20 @@ io.on('connection', (socket) => {
         broadcastState();
     });
 
+    socket.on('chatMessage', ({ message, playerId }) => {
+        const player = game.players.find(p => p.socketId === socket.id);
+        if (player && message.trim().length > 0) {
+            // Broadcast message to everyone in the room
+            io.to(game.id).emit('chatMessage', {
+                id: Date.now() + Math.random(),
+                text: message.trim().substring(0, 100), // Limit length
+                senderId: player.id,
+                senderName: player.name,
+                timestamp: new Date().toISOString()
+            });
+        }
+    });
+
     socket.on('leaveGame', (data, callback) => {
         // Try to find player by socket ID first, then by player ID from data
         let player = game.players.find(p => p.socketId === socket.id);

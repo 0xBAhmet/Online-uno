@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import Lobby from './components/Lobby';
 import GameBoard from './components/GameBoard';
+import Chat from './components/Chat';
 
 import { translations } from './translations';
 
@@ -25,6 +26,11 @@ function App() {
     return newId;
   });
   const [serverError, setServerError] = useState('');
+
+  // Chat State
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const t = translations[language];
 
@@ -80,6 +86,13 @@ function App() {
       setServerError(msg);
       // Clear error after 3 seconds
       setTimeout(() => setServerError(''), 5000);
+    });
+
+    socket.on('chatMessage', (msg) => {
+      setChatMessages(prev => [...prev, msg]);
+      if (!chatOpen) {
+        setUnreadCount(prev => prev + 1);
+      }
     });
 
     return () => {
@@ -139,23 +152,68 @@ function App() {
         </div>
       )}
 
-      {/* Language Toggle */}
-      <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 3000 }}>
-        <button
-          onClick={() => setLanguage(l => l === 'tr' ? 'en' : 'tr')}
-          style={{
-            background: 'rgba(0,0,0,0.5)',
-            color: 'white',
-            border: '1px solid white',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          {language === 'tr' ? '🇹🇷 TR / 🇬🇧 EN' : '🇬🇧 EN / 🇹🇷 TR'}
-        </button>
-      </div>
+      {/* Language Toggle - Only Show in Lobby */}
+      {isInLobby && (
+        <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 3000 }}>
+          <button
+            onClick={() => setLanguage(l => l === 'tr' ? 'en' : 'tr')}
+            style={{
+              background: 'rgba(0,0,0,0.5)',
+              color: 'white',
+              border: '1px solid white',
+              padding: '5px 10px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            {language === 'tr' ? '🇹🇷 TR / 🇬🇧 EN' : '🇬🇧 EN / 🇹🇷 TR'}
+          </button>
+        </div>
+      )}
+
+      {/* Chat Feature - Only Show In Game */}
+      {isPlaying && (
+        <>
+          {/* Chat Toggle Button */}
+          <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 3000 }}>
+            <button
+              onClick={() => {
+                setChatOpen(!chatOpen);
+                if (!chatOpen) setUnreadCount(0);
+              }}
+              style={{
+                background: 'rgba(0,0,0,0.6)',
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '50%',
+                width: '45px',
+                height: '45px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem',
+                position: 'relative'
+              }}
+            >
+              💬
+              {unreadCount > 0 && !chatOpen && (
+                <span className="unread-badge">{unreadCount}</span>
+              )}
+            </button>
+          </div>
+
+          <Chat
+            socket={socket}
+            myPlayerId={myPlayerId}
+            isOpen={chatOpen}
+            onClose={() => setChatOpen(false)}
+            messages={chatMessages}
+            t={t}
+          />
+        </>
+      )}
 
       {winner && (
         <div className="color-picker-overlay">
@@ -184,7 +242,7 @@ function App() {
         <GameBoard
           socket={socket}
           gameState={gameState}
-          myId={myPlayerId} // Using Stable ID now
+          myId={myPlayerId}
           t={t}
         />
       )}
