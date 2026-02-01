@@ -99,14 +99,21 @@ function App() {
     return (
       <div className="loading-container">
         <div className="loading-card-stack">
-          <div className="loading-card red scale-up-center">UNO</div>
-          <div className="loading-card blue scale-up-center" style={{ animationDelay: '0.2s' }}>UNO</div>
-          <div className="loading-card green scale-up-center" style={{ animationDelay: '0.4s' }}>UNO</div>
+          <div className="loading-card red">UNO</div>
+          <div className="loading-card blue">UNO</div>
+          <div className="loading-card green">UNO</div>
         </div>
-        <h2 style={{ marginTop: '2rem', color: 'white' }}>{t.loading}...</h2>
-        <p style={{ color: isConnected ? '#4caf50' : '#f44336' }}>
-          {isConnected ? '✓ Server Connected' : '⚠ Connecting to Server...'}
-        </p>
+        <h2 className="loading-title">{t.loading}...</h2>
+        <div className="loading-status">
+          <span style={{
+            height: '10px',
+            width: '10px',
+            borderRadius: '50%',
+            background: isConnected ? '#4caf50' : '#f44336',
+            boxShadow: `0 0 10px ${isConnected ? '#4caf50' : '#f44336'}`
+          }}></span>
+          {isConnected ? 'Server Connected' : 'Connecting to Server...'}
+        </div>
       </div>
     );
   }

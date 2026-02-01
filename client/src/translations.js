@@ -20,7 +20,7 @@ export const translations = {
         kick: 'At',
         vote: 'Oy',
         waiting: 'Oyuncu Bekleniyor',
-        disconnected: 'bağlantısı koptu.',
+        disconnected: 'Bağlantısı koptu.',
         waitingReconnect: 'Geri dönmesi bekleniyor...',
         unoServerRunning: 'Uno Sunucusu Çalışıyor! 🚀'
     },
@@ -45,7 +45,7 @@ export const translations = {
         kick: 'Kick',
         vote: 'Vote',
         waiting: 'Waiting for Player',
-        disconnected: 'disconnected.',
+        disconnected: 'Disconnected.',
         waitingReconnect: 'Waiting for reconnection...',
         unoServerRunning: 'Uno Server is Running! 🚀'
     }

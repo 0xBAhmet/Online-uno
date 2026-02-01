@@ -72,78 +72,142 @@ button:focus-visible {
   }
 }
 
-/* Loading Animation */
+/* Loading Animation & Screen */
 .loading-container {
   height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle, #2c3e50, #000000);
+  background: radial-gradient(circle at center, #2b32b2, #1488cc);
+  /* Premium Blue Gradient */
+  background-size: 200% 200%;
+  animation: gradientBG 10s ease infinite;
   overflow: hidden;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .loading-card-stack {
   position: relative;
-  width: 100px;
-  height: 150px;
+  width: 120px;
+  height: 180px;
+  margin-bottom: 3rem;
+  perspective: 1000px;
 }
 
 .loading-card {
   position: absolute;
-  width: 80px;
-  height: 120px;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
   border: 4px solid white;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: 900;
-  font-size: 1.5rem;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  font-size: 2rem;
+  color: #f7d002;
+  /* Uno Yellow Text */
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  transform-origin: center bottom;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+  backdrop-filter: blur(5px);
 }
 
 .loading-card.red {
-  background: #f44336;
-  transform: rotate(-10deg);
+  background-color: #ff5555;
+  animation: dealCard 2s infinite ease-in-out;
+  animation-delay: 0s;
   z-index: 3;
 }
 
 .loading-card.blue {
-  background: #2196f3;
-  transform: rotate(5deg);
-  left: 10px;
-  top: 5px;
+  background-color: #5555ff;
+  animation: dealCard 2s infinite ease-in-out;
+  animation-delay: 0.3s;
   z-index: 2;
 }
 
 .loading-card.green {
-  background: #4caf50;
-  transform: rotate(20deg);
-  left: 20px;
-  top: 10px;
+  background-color: #55aa55;
+  animation: dealCard 2s infinite ease-in-out;
+  animation-delay: 0.6s;
   z-index: 1;
 }
 
-.scale-up-center {
-  animation: scale-up-center 1.5s cubic-bezier(0.390, 0.575, 0.565, 1.000) infinite both;
-}
+@keyframes dealCard {
 
-@keyframes scale-up-center {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-
-  50% {
-    transform: scale(1);
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
     opacity: 1;
   }
 
+  50% {
+    transform: translateY(-20px) rotate(10deg) scale(1.1);
+  }
+}
+
+.loading-title {
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  animation: fadeIn 1s ease-in;
+}
+
+.loading-status {
+  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+
   100% {
-    transform: scale(0.5);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
     opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
